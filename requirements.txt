@@ -1,0 +1,6 @@
+streamlit>=1.40
+pandas
+openpyxl
+scipy
+altair
+google-genai
