@@ -97,7 +97,8 @@ with aba_avisos:
     col1, col2 = st.columns([1, 2])
     with col1:
         st.subheader("1. Informe os dados")
-        id_avisos = st.text_input("ID da Turma (Ex: 932):", key="id_avisos")
+        id_avisos = st.number_input("ID da Turma (de 101 a 220):", min_value=101, max_value=220, value=None,
+                                    step=1, placeholder="Ex: 101", key="id_avisos")
         modelo = st.selectbox("Selecione o Modelo:", list(modelos.MODELOS))
         gerar_aviso = st.button("🚀 Gerar Aviso", width="stretch")
     with col2:
