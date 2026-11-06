@@ -32,7 +32,7 @@ def semear(n=80, semente=7):
             con.execute(
                 """INSERT INTO atendimentos (data_hora, id_turma, operador, duvida, resposta, encaminhado_email,
                    assunto, modelo_ia, tempo_ms, origem, canal) VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
-                (quando.strftime("%Y-%m-%d %H:%M:%S"), rnd.choice([None, *range(101, 197)]),
+                (quando.strftime("%Y-%m-%d %H:%M:%S"), rnd.choice([None, *range(101, 221)]),
                  rnd.choice(["Operador A", "Operador B", "Operador C"]), ASSUNTOS[assunto],
                  "(resposta de exemplo)", int(rnd.random() < .08), assunto, config.MODELO_IA,
                  rnd.randint(1200, 4200), "demo", canal))
