@@ -11,16 +11,17 @@ import demo
 import hipoteses
 import historico
 import ia
+import inicio
 import modelos
 
-st.set_page_config(page_title="Academia Exemplo - Operacional", page_icon="⚽", layout="wide")
+st.set_page_config(page_title="Painel Operacional de Cursos", page_icon="⚽", layout="wide")
 
 # ----------------------------------------------------------------------------
 # acesso por senha (opcional: só vale se APP_SENHA estiver configurada)
 # ----------------------------------------------------------------------------
 _senha_app = os.environ.get("APP_SENHA", "")
 if _senha_app and not st.session_state.get("autenticado"):
-    st.title("⚽ Sistema Operacional - Academia Exemplo (dados fictícios)")
+    st.title("⚽ Painel Operacional de Cursos")
     _tentativa = st.text_input("Senha de acesso", type="password")
     if _tentativa:
         if hmac.compare_digest(_tentativa, _senha_app):
@@ -28,6 +29,16 @@ if _senha_app and not st.session_state.get("autenticado"):
             st.rerun()
         else:
             st.error("Senha incorreta.")
+    st.stop()
+
+
+# ----------------------------------------------------------------------------
+# capa: tela inicial com um botão para entrar no painel
+# ----------------------------------------------------------------------------
+if not st.session_state.get("entrou"):
+    if inicio.mostrar():
+        st.session_state["entrou"] = True
+        st.rerun()
     st.stop()
 
 
@@ -40,6 +51,9 @@ def mostrar_avisos(avisos):
 # barra lateral
 # ----------------------------------------------------------------------------
 st.sidebar.title("⚙️ Configurações")
+if st.sidebar.button("🏠 Tela inicial", width="stretch"):
+    st.session_state["entrou"] = False
+    st.rerun()
 
 api_key = os.environ.get("GEMINI_API_KEY", "").strip()
 if api_key:
@@ -85,7 +99,7 @@ if base.avisos:
 # ----------------------------------------------------------------------------
 # página
 # ----------------------------------------------------------------------------
-st.title("⚽ Sistema Operacional - Academia Exemplo (dados fictícios)")
+st.title("⚽ Painel Operacional de Cursos")
 st.markdown("**Versão de demonstração com dados fictícios.** Use as abas abaixo para gerar avisos, responder dúvidas dos alunos ou ver os testes de hipóteses. "
             "Os textos são **rascunhos**: revise antes de enviar.")
 
