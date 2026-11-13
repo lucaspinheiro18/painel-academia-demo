@@ -260,6 +260,10 @@ def h5(d):
                "Grupos com menos de 5 turmas ficam fora do teste.")
 
 
+# Hipóteses exibidas no app (as outras funções continuam no código, para o relatório final).
+HIPOTESES_NO_APP = (h1, h4)
+
+
 def mostrar(caminho: str, aba: str, assinatura=None):
     st.subheader("Hipóteses e testes estatísticos")
     st.caption("Testes calculados na hora sobre a planilha de turmas (dados fictícios nesta versão). "
@@ -271,7 +275,7 @@ def mostrar(caminho: str, aba: str, assinatura=None):
         return
     st.markdown(f"**Base:** {len(d)} turmas · {int(d['dur_pres'].notna().sum())} com fase presencial · "
                 f"{int(d['vagas'].notna().sum())} com capacidade informada.")
-    for i, f in enumerate((h1, h2, h3, h4, h5)):
+    for i, f in enumerate(HIPOTESES_NO_APP):
         if i:
             st.divider()
         f(d)
