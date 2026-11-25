@@ -16,6 +16,20 @@ Para que possamos analisar a sua situação detalhadamente e fornecer a orienta�
 Nossa equipe dará o retorno diretamente por lá. Seguimos à disposição! ⚽"""
 # CONFERIR: a frase do meio foi completada a partir de um PDF com linha cortada.
 
+# Perguntas que a FAQ e as planilhas cobrem: usadas como exemplos na tela (demonstração).
+PERGUNTAS_EXEMPLO = [
+    "Bom dia! Qual é o link do Zoom da minha turma?",
+    "Quando começa a parte presencial e qual é o endereço?",
+    "Qual o horário das aulas online?",
+    "Se eu faltar uma aula ainda recebo o certificado?",
+    "As aulas ficam gravadas? Posso assistir depois?",
+    "Em quanto tempo recebo o certificado depois do curso?",
+    "O que preciso levar para o presencial?",
+    "Posso parcelar o pagamento do curso?",
+    "Tem alimentação no local do presencial?",
+    "Minha turma foi adiada, o que acontece agora?",
+]
+
 
 # ----------------------------------------------------------------------------
 # privacidade (LGPD): mascarar antes de enviar à IA e antes de gravar no histórico
@@ -51,7 +65,9 @@ BASE DE CONHECIMENTO (sua única fonte de informações):
 
 REGRAS:
 1. INVISIBILIDADE TOTAL: nunca use frases como "Não tenho essa informação", "A base de conhecimento diz", "Como assistente virtual" ou qualquer menção a IA, sistema ou base de dados. Escreva como um membro da equipe ("nossa equipe", "nós").
-2. ENCAMINHAMENTO: se a dúvida tratar de um assunto que NÃO está na base de conhecimento nem nos dados da turma, não invente nada. Nesse caso responda SOMENTE com a palavra {TOKEN_ENCAMINHAR}, sem mais nenhum texto.
+2. RESPONDA SEMPRE QUE PUDER: procure a resposta na base de conhecimento E nos dados da turma (datas, horários, link do Zoom, endereço, status, vagas). Combine as informações quando precisar. Se só parte da dúvida estiver coberta, responda essa parte e, apenas para o restante, oriente o envio por e-mail para {config.EMAIL_ATENDIMENTO}. Cumprimentos, agradecimentos e mensagens simples ("bom dia", "obrigado") recebem uma resposta cordial curta.
+   ENCAMINHAMENTO: use {TOKEN_ENCAMINHAR} (sozinho, sem mais nenhum texto) SOMENTE quando NADA da dúvida puder ser respondido com a base e os dados da turma. Nunca invente datas, valores, links ou regras que não estejam escritos.
+   Se a dúvida depender da turma (datas, link, endereço) e nenhum ID foi informado, responda o que vale para todas as turmas e peça, na mesma resposta, o número da turma.
 3. FORMATAÇÃO: quando souber a resposta, use exatamente esta estrutura, com linhas em branco entre os blocos:
 
 Prezado(a), como vai? Esperamos que esteja bem.
@@ -67,12 +83,22 @@ Seguimos à disposição! ⚽
 
 def dados_para_ia(turma) -> str:
     if turma is None:
-        return "- NENHUM ID INFORMADO: responda de forma institucional padrão para o aluno."
-    linhas = [f"- Turma ID: {turma.id}"]
-    if turma.curso_licenca:
-        linhas.append(f"- Curso: {turma.curso_licenca}")
-    linhas.append(f"- Endereço Presencial: {turma.local or 'A confirmar'}")
-    return "\n".join(linhas)
+        return ("- NENHUM ID INFORMADO: responda com as regras gerais da base de conhecimento; "
+                "se a resposta depender da turma, peça o número da turma.")
+    campos = (
+        ("Turma ID", turma.id),
+        ("Curso", turma.curso_licenca),
+        ("Status da turma", turma.status),
+        ("Fase online", " a ".join(x for x in (turma.inicio_online, turma.fim_online) if x)),
+        ("Horário das aulas online", "a partir das 19h (encontros das 19h às 22h)"),
+        ("Link do Zoom (o mesmo em todas as aulas)", turma.zoom),
+        ("Fase presencial", " a ".join(x for x in (turma.inicio_presencial, turma.fim_presencial) if x)),
+        ("Horário do presencial", "das 8h às 18h"),
+        ("Endereço do presencial", turma.local or "a confirmar (informado ao grupo cerca de 15 dias antes)"),
+        ("Estado / região", " / ".join(x for x in (turma.estado, turma.regiao) if x)),
+        ("Máximo de alunos", turma.vagas),
+    )
+    return "\n".join(f"- {rotulo}: {valor}" for rotulo, valor in campos if valor not in ("", None))
 
 
 def montar_conteudo(mensagem_mascarada: str, turma) -> str:
@@ -141,7 +167,9 @@ BASE DE CONHECIMENTO (sua única fonte de informações):
 
 REGRAS:
 1. INVISIBILIDADE TOTAL: nunca mencione IA, sistema, base de conhecimento ou frases como "Não tenho essa informação". Escreva como um membro da equipe ("nossa equipe", "nós").
-2. ENCAMINHAMENTO: se a dúvida tratar de um assunto que NÃO está na base de conhecimento nem nos dados da turma, não invente nada. Nesse caso responda SOMENTE com a palavra {TOKEN_ENCAMINHAR}, sem mais nenhum texto.
+2. RESPONDA SEMPRE QUE PUDER: procure a resposta na base de conhecimento E nos dados da turma (datas, horários, link do Zoom, endereço, status, vagas). Combine as informações quando precisar. Se só parte do e-mail estiver coberta, responda essa parte e diga que a equipe retornará sobre o restante.
+   ENCAMINHAMENTO: use {TOKEN_ENCAMINHAR} (sozinho, sem mais nenhum texto) SOMENTE quando NADA do e-mail puder ser respondido com a base e os dados da turma. Nunca invente datas, valores, links ou regras que não estejam escritos.
+   Se a dúvida depender da turma (datas, link, endereço) e nenhum ID foi informado, responda o que vale para todas as turmas e peça o número da turma.
 3. FORMATO DA RESPOSTA (siga exatamente):
 ASSUNTO: Re: <assunto original do aluno; se vier vazio, crie um assunto curto e objetivo>
 

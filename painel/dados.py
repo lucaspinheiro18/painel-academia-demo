@@ -44,6 +44,10 @@ class Turma:
     fim_online: str = ""
     local: str = ""
     zoom: str = ""
+    status: str = ""
+    estado: str = ""
+    regiao: str = ""
+    vagas: str = ""
     avisos: list = field(default_factory=list)
 
     @property
@@ -237,6 +241,13 @@ def _ler_cbf(avisos_globais: list) -> dict:
                 setattr(t, atributo, texto)
                 if invalida:
                     t.avisos.append(("aviso", f"'{COLUNAS_CBF[chave]}': o valor \"{_txt(cel.value)}\" não é uma data válida."))
+
+            # campos extras (só para o assistente; nunca herdados)
+            for nome_col, atributo in (("Status", "status"), ("Estado", "estado"),
+                                       ("Região", "regiao"), ("Máximo de alunos", "vagas")):
+                cel = pl.cel(r, nome_col)
+                if cel is not None:
+                    setattr(t, atributo, _txt(cel.value))
 
             if herdados:
                 t.avisos.append(("aviso", "Células vazias na planilha; usei o valor da linha anterior em: "

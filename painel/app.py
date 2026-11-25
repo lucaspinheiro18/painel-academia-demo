@@ -42,6 +42,18 @@ if not st.session_state.get("entrou"):
     st.stop()
 
 
+def _usar_exemplo(destino, origem):
+    """Copia a pergunta de exemplo escolhida para a caixa de texto."""
+    st.session_state[destino] = st.session_state[origem]
+
+
+def caixa_de_exemplos(destino, chave):
+    with st.expander("💡 Perguntas de exemplo (para testar)"):
+        st.selectbox("Escolha uma pergunta:", ia.PERGUNTAS_EXEMPLO, key=chave)
+        st.button("Usar esta pergunta", key=f"btn_{chave}", on_click=_usar_exemplo, args=(destino, chave))
+        st.caption("Dica: informe um ID de turma (ex.: 102) para a resposta trazer datas, Zoom e endereço.")
+
+
 def mostrar_avisos(avisos):
     for gravidade, msg in avisos:
         (st.error if gravidade == "erro" else st.warning)(msg)
@@ -139,7 +151,8 @@ with aba_atendimento:
         st.subheader("1. Dúvida do Aluno")
         id_atend = st.text_input("ID da Turma (opcional; deixe em branco para dúvidas gerais):",
                                  key="id_atend")
-        mensagem = st.text_area("Cole a mensagem do WhatsApp aqui:", height=150)
+        caixa_de_exemplos("msg_whats", "ex_whats")
+        mensagem = st.text_area("Cole a mensagem do WhatsApp aqui:", height=150, key="msg_whats")
         responder = st.button("🤖 Gerar Resposta Inteligente", width="stretch",
                               disabled=not base.faq)
     with col_b:
@@ -198,6 +211,7 @@ with aba_email:
                                  key="id_email")
         nome_aluno = st.text_input("Nome do aluno (opcional, para a saudação):", key="nome_email").strip()
         assunto_email = st.text_input("Assunto do e-mail recebido:", key="assunto_email").strip()
+        caixa_de_exemplos("corpo_email", "ex_email")
         corpo_email = st.text_area("Cole o corpo do e-mail aqui:", height=220, key="corpo_email")
         responder_email = st.button("✉️ Gerar Resposta por E-mail", width="stretch",
                                     disabled=not base.faq, key="btn_email")
