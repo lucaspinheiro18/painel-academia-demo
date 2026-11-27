@@ -156,14 +156,14 @@ def h2(d):
               "há correlação entre a duração do online e a do presencial.",
               "Correlação de Spearman (pares completos).")
     cols = {"dur_online": "Duração online", "dur_pres": "Duração presencial", "intervalo": "Intervalo", "vagas": "Capacidade"}
-    base = d[list(cols)].dropna()
-    par = base[["dur_online", "dur_pres"]]
+    base = d[list(cols)]
+    par = base[["dur_online", "dur_pres"]].dropna()  # turmas com as duas fases
     rho, p = stats.spearmanr(par["dur_online"], par["dur_pres"])
     a, b, c = st.columns(3)
     a.metric("ρ de Spearman (online × presencial)", n_(rho))
     b.metric("p-valor", p_(p))
-    c.metric("Turmas com todos os dados", len(base))
-    mat = base.rename(columns=cols).corr(method="spearman")
+    c.metric("Turmas com as duas fases", len(par))
+    mat = base.rename(columns=cols).corr(method="spearman")  # pares completos de cada dupla
     longo = mat.reset_index().melt("index", var_name="y", value_name="rho").rename(columns={"index": "x"})
     longo["rotulo"] = longo["rho"].map(lambda v: n_(v))
     cor = alt.Chart(longo).mark_rect().encode(
