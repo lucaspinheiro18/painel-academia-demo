@@ -54,5 +54,5 @@ def mostrar() -> bool:
     _, meio, _ = st.columns([1, 1.4, 1])
     with meio:
         entrou = st.button("Entrar no painel →", type="primary", width="stretch")
-    st.markdown('<div class="nota">Versão de demonstração · dados fictícios</div>', unsafe_allow_html=True)
+    st.markdown('<div class="nota">Versão de demonstração · dados fictícios de planejamento 2027</div>', unsafe_allow_html=True)
     return entrou

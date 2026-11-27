@@ -51,7 +51,7 @@ def caixa_de_exemplos(destino, chave):
     with st.expander("💡 Perguntas de exemplo (para testar)"):
         st.selectbox("Escolha uma pergunta:", ia.PERGUNTAS_EXEMPLO, key=chave)
         st.button("Usar esta pergunta", key=f"btn_{chave}", on_click=_usar_exemplo, args=(destino, chave))
-        st.caption("Dica: informe um ID de turma (ex.: 102) para a resposta trazer datas, Zoom e endereço.")
+        st.caption("Dica: informe um ID de turma (ex.: 101) para a resposta trazer datas, Zoom e endereço.")
 
 
 def mostrar_avisos(avisos):
@@ -123,7 +123,7 @@ with aba_avisos:
     col1, col2 = st.columns([1, 2])
     with col1:
         st.subheader("1. Informe os dados")
-        id_avisos = st.number_input("ID da Turma (de 101 a 220):", min_value=101, max_value=220, value=None,
+        id_avisos = st.number_input("ID da Turma (de 101 a 204):", min_value=101, max_value=204, value=None,
                                     step=1, placeholder="Ex: 101", key="id_avisos")
         modelo = st.selectbox("Selecione o Modelo:", list(modelos.MODELOS))
         gerar_aviso = st.button("🚀 Gerar Aviso", width="stretch")

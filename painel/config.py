@@ -12,7 +12,7 @@ TEMPERATURA = 0.1
 ARQ_CBF = os.path.join(BASE, "Turmas_Ficticias.xlsx")
 ABA_CBF = "Licenças"
 ARQ_ORG = os.path.join(BASE, "Organizacao_Ficticia.xlsx")
-ABA_ORG = "2026"
+ABA_ORG = "2027"
 ARQ_FAQ = os.path.join(BASE, "FAQ_Ficticia.xlsx")
 ARQ_HISTORICO_ANTIGO = os.path.join(BASE, "Historico_Atendimentos.xlsx")  # importado uma única vez, se existir
 

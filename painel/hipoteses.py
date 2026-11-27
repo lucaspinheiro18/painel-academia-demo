@@ -1,4 +1,4 @@
-"""Aba 'Hipóteses': testes de hipóteses sobre as turmas (dados da planilha de turmas).
+"""Aba 'Hipóteses': testes de hipóteses sobre as turmas (base fictícia de planejamento 2027).
 
 Tudo é calculado na hora a partir da planilha; se ela mudar, os resultados mudam.
 Nível de significância: 5%. Quando há várias comparações, usa-se a correção de Holm.
@@ -37,6 +37,7 @@ def carregar(caminho: str, aba: str, assinatura=None) -> pd.DataFrame:
         "dur_pres": (d["Fim Presencial"] - d["Início Presencial"]).dt.days,
         "intervalo": (d["Início Presencial"] - d["Fim Online"]).dt.days,
         "vagas": pd.to_numeric(d["Máximo de alunos"], errors="coerce"),
+        "licenca": d["Licença"].astype(str).str.strip(),
         "mes": d["Início Online"].dt.month,
         "adiada": d["Status"].astype(str).str.contains("adiad", case=False).astype(int),
     })
@@ -176,7 +177,7 @@ def h2(d):
              "não rejeitamos H₀: não há evidência de correlação entre as durações.")
 
 
-def h3(d):
+def h_regioes(d):
     cabecalho("H3", "Distribuição das turmas presenciais pelas regiões",
               "as turmas presenciais se distribuem entre as regiões na mesma proporção da população.",
               "a distribuição das turmas difere da distribuição da população.",
@@ -209,6 +210,32 @@ def h3(d):
             st.caption("⚠️ Há regiões com menos de 5 turmas esperadas; leia o p-valor com cautela.")
     veredito(p, "rejeitamos H₀: a oferta de turmas não acompanha a população.",
              "não rejeitamos H₀: não há evidência de que a oferta destoe da população.")
+
+
+def h3(d):
+    cabecalho("H3", "Duração da fase online por nível de licença",
+              "a duração da fase online é a mesma nas licenças A, B e C.",
+              "pelo menos um nível de licença tem duração diferente.",
+              "Kruskal-Wallis (comparações em pares: Mann-Whitney com correção de Holm). Tamanho de efeito: ε².")
+    niveis = ["Licença A", "Licença B", "Licença C"]
+    base = d[d["licenca"].isin(niveis)].dropna(subset=["dur_online"])
+    H, p = stats.kruskal(*[base.loc[base["licenca"] == n, "dur_online"] for n in niveis])
+    eps2 = H / (len(base) - 1)
+    a, b, c = st.columns(3)
+    a.metric("H de Kruskal-Wallis", n_(H))
+    b.metric("p-valor", p_(p))
+    c.metric("Efeito ε²", n_(eps2))
+    esq, dir_ = st.columns([3, 2])
+    with esq:
+        graf = alt.Chart(base).mark_boxplot(size=22, color=AZUL, extent="min-max").encode(
+            y=alt.Y("licenca:N", sort=niveis, title=None),
+            x=alt.X("dur_online:Q", title="Duração da fase online (dias)"))
+        st.altair_chart(graf.properties(height=180), width="stretch")
+    with dir_:
+        res = base.groupby("licenca")["dur_online"].agg(Turmas="count", Mediana="median").reindex(niveis)
+        st.dataframe(res, width="stretch")
+    veredito(p, "rejeitamos H₀: a duração do online varia conforme o nível da licença.",
+             "não rejeitamos H₀: não há evidência de diferença entre as licenças.")
 
 
 def h4(d):
@@ -266,7 +293,8 @@ HIPOTESES_NO_APP = (h1, h4)
 
 def mostrar(caminho: str, aba: str, assinatura=None):
     st.subheader("Hipóteses e testes estatísticos")
-    st.caption("Testes calculados na hora sobre a planilha de turmas (dados fictícios nesta versão). "
+    st.caption("Testes calculados na hora sobre a planilha de turmas (base fictícia de planejamento 2027, projetada "
+               "a partir dos padrões das turmas de 2024 a 2026). "
                "Nível de significância de 5%; p-valor menor que 0,05 indica evidência contra a hipótese nula (H₀).")
     try:
         d = carregar(caminho, aba, assinatura)
